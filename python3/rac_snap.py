@@ -518,7 +518,7 @@ class Instances_Snap:
 
         print_lines    = self.print_global_sess_lines
         s              = self.sys
-        line_format    = '{:<17} {:<20} {:<15} {:<43} {:8} {:12} {:12} {:12} {:12} {:12} {:10} {:8} {:8}'
+        line_format    = '{:<17} {:<20} {:<15} {:<43} {:>8} {:>12} {:>12} {:>12} {:>12} {:>12} {:>10} {:>8} {:>8}'
         total_sessions = len(s['glob_sess'])
 
 
