@@ -296,7 +296,7 @@ class Instances_Snap:
             self.sys['glob_sess']     = []
 
             sql_stmt = "select  s.state, \
-                        '(' || s.inst_id || ': ' || s.sid || ',' || s.serial# || ')' sid , \
+                        s.sid || ',' || s.serial# sid , \
                         s.username  username, \
                         case when s.state != 'WAITING' \
                              then 'On CPU (Prev: ' || case when length(s.event) > 25 \
@@ -311,7 +311,8 @@ class Instances_Snap:
                         s.seconds_in_wait seconds, nvl(s.sql_id, '--') sql_id, \
                         s.last_call_et, \
                         io.block_gets, io.consistent_gets, io.physical_reads, io.block_changes, io.consistent_gets, \
-                        p.spid, nvl(to_char(px.qcsid), ' ')  \
+                        p.spid, nvl(to_char(px.qcsid), ' '),  \
+                        s.inst_id  \
                         from gv$session s, gv$sess_io io, gv$process p, gv$px_session px \
                         where s.inst_id = p.inst_id and s.inst_id = io.inst_id and s.inst_id = px.inst_id(+)  \
                         and p.inst_id = io.inst_id and p.inst_id = px.inst_id  \
@@ -347,6 +348,7 @@ class Instances_Snap:
                 r[i]['cons_changes']    = rows[i][15]
                 r[i]['os_pid']          = rows[i][16]
                 r[i]['qc_sid']          = rows[i][17]
+                r[i]['instance_id']     = rows[i][18]
 
             self.sys['glob_sess'] = r
 
@@ -518,7 +520,7 @@ class Instances_Snap:
 
         print_lines    = self.print_global_sess_lines
         s              = self.sys
-        line_format    = '{:<17} {:<20} {:<15} {:<43} {:>8} {:>12} {:>12} {:>12} {:>12} {:>12} {:>10} {:>8} {:>8}'
+        line_format    = '{:<8} {:<17} {:<20} {:<15} {:<43} {:>8} {:>12} {:>12} {:>12} {:>12} {:>12} {:>10} {:>8} {:>8}'
         total_sessions = len(s['glob_sess'])
 
 
@@ -531,12 +533,13 @@ class Instances_Snap:
 
             if i == start:
                 print(color.BOLD + '\n-- Top Global Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END)
-                line = line_format.format( 'Inst: SID,Serial', 'Username', 'SQL ID', 'Event', 'ET',
+                line = color.BOLD + line_format.format( 'Instance', 'SID,Serial', 'Username', 'SQL ID', 'Event', 'ET',
                                       'Blk Gets', 'Cons Gets', 'Phy Rds', 'Blk Chgs',
-                                      'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' )
+                                      'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' ) + color.END
                 print(line)
 
             line = line_format.format(
+                                   s['glob_sess'][i]['instance_id'],
                                    s['glob_sess'][i]['sid'],
                                    s['glob_sess'][i]['username'][:19],
                                    s['glob_sess'][i]['sql_id'],
