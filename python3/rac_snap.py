@@ -31,9 +31,9 @@ import orautility
 ## usage
 ##
 def usage_exit(message):
-    print message
-    print "Usage:"
-    print os.path.abspath( __file__ ), '\n \
+    print(message)
+    print("Usage:")
+    print(os.path.abspath( __file__ ), '\n \
     Options: \n\n \
         [ -c CONNECTION_STRING ] \n \
              Connection String Format:  SID:Hostname[:User:Password] \n\n \
@@ -42,7 +42,7 @@ def usage_exit(message):
                                SESS \n \
                                STAT \n \
                                EVENT \n \
-                               METRIC \n '
+                               METRIC \n ')
 
     sys.exit(2)
 
@@ -72,8 +72,8 @@ def max_length(a, b):
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "c:f:")
-    except getopt.GetoptError, err:
-        print str(err)
+    except getopt.GetoptError as err:
+        print(str(err))
         usage_exit('getopt error:')
 
     connect    = None
@@ -100,7 +100,7 @@ def main():
         try:
             my_snap.create_snapshot()
         except KeyboardInterrupt:
-            print 'Exiting...'
+            print('Exiting...')
             sys.exit(0)
 
         
@@ -281,7 +281,7 @@ class Instances_Snap:
 
             instances = self.sys['instance_count']
             for i in range(1, instances+1):
-                l = sorted(d[i].iteritems(), key=operator.itemgetter(1))
+                l = sorted(iter(d[i].items()), key=operator.itemgetter(1))
                 self.sys['stat'][i]['delta'] = l
 
 
@@ -403,7 +403,7 @@ class Instances_Snap:
 
             instances = self.sys['instance_count']
             for i in range(1, instances+1):
-                l = sorted(d[i].iteritems(), key=operator.itemgetter(1))
+                l = sorted(iter(d[i].items()), key=operator.itemgetter(1))
                 self.sys['event'][i]['delta'] = l
 
 
@@ -412,7 +412,7 @@ class Instances_Snap:
         s           = self.sys
         columns     = self.sys['instance_count']
         column_length = self.linesize/columns
-        line_format = '%-' + str(column_length) + 's %-2s'
+        line_format = '{:<' + str(column_length) + '}'
 
 
         field_names = { 'instance_name':                     'Instance',
@@ -427,15 +427,15 @@ class Instances_Snap:
 
         i            = 0
         line         = ''
-        stat_format  = '%-13s %-10s'
+        stat_format  = '{:<13} {:<10}'
         print_fields = ['instance_name', 'host_name', 'sysdate', 'startup_time', 'status', 'database_status']
 
-        print color.BOLD + '\n-- Instance Info ' + self.delimiter + color.END 
+        print(color.BOLD + '\n-- Instance Info ' + self.delimiter + color.END) 
         for j in print_fields:
             for i in range(0, len(s['instances']) ):
-                stat = stat_format % ( field_names[j] + ': ' ,  str(s['instances'][i][j]) )
-                line = line + line_format % ( stat, ' ' )
-            print line
+                stat = stat_format.format( field_names[j] + ': ' ,  str(s['instances'][i][j]) )
+                line = line + line_format.format( stat )
+            print(line)
             line = ''
 
 
@@ -450,27 +450,27 @@ class Instances_Snap:
         stat_line     = ''
         head          = ''
         head_line     = ''
-        stat_format   = '%-30s %-15.0f %-15s'
-        head_format   = '%-30s %-15s %-15s'
-        line_format = '%-' + str(column_length) + 's %-2s'
-        print color.BOLD + '\n-- Statistics ' + self.delimiter + color.END
+        stat_format   = '{:<30} {:<15.0f} {:<15}'
+        head_format   = '{:<30} {:<15s} {:<15}'
+        line_format = '{:<' + str(column_length) + '}'
+        print(color.BOLD + '\n-- Statistics ' + self.delimiter + color.END)
         for line_id in range(print_lines):
             for inst_id in range(1, instances+1):
                 i = len( s['stat'][inst_id]['delta']) - line_id -1
                 if line_id == 0:
-                    head = head_format  % ('Statistic (Node: ' + str(inst_id) + ')' , 'Delta', 'Rate')
-                    head_line = head_line + line_format % ( head, ' ' )
+                    head = head_format.format('Statistic (Node: ' + str(inst_id) + ')' , 'Delta', 'Rate')
+                    head_line = head_line + line_format.format( head )
                 
                 statistic = s['stat'][inst_id]['delta'][i][0]
                 value     = s['stat'][inst_id]['delta'][i][1]
                 delta     = str(s['stat'][inst_id]['delta'][i][1]/self.sleep_time) +  '/Sec' 
 
-                stat_line = stat_format  % ( statistic[:30], value, delta )
-                line      = line + line_format % ( stat_line, ' ')
+                stat_line = stat_format.format( statistic[:30], value, delta )
+                line      = line + line_format.format( stat_line )
 
             if line_id == 0:
-                print color.BOLD + head_line  + color.END
-            print line 
+                print(color.BOLD + head_line  + color.END)
+            print(line) 
             line = ''
             stat_line = ''
 
@@ -482,34 +482,34 @@ class Instances_Snap:
         instances     = self.sys['instance_count']
         print_lines   = self.print_event_lines
         line          = ''
-        event_line     = ''
+        event_line    = ''
         head          = ''
         head_line     = ''
-        event_format   = '%-30s %-15.0f %-15s'
-        head_format   = '%-30s %-15s %-15s'
-        line_format = '%-' + str(column_length) + 's %-2s'
-        print color.BOLD + '\n-- Events ' + self.delimiter + color.END
+        event_format  = '{:<30} {:<15.0f} {:<15}'
+        head_format   = '{:<30} {:<15} {:<15}'
+        line_format   = '{:<' + str(column_length) + '}'
+        print(color.BOLD + '\n-- Events ' + self.delimiter + color.END)
         for line_id in range(print_lines):
             for inst_id in range(1, instances+1):
                 i = len( s['event'][inst_id]['delta']) - line_id -1
                 if line_id == 0:
-                    head = head_format  % ('Event', 'Delta (ms)', 'Rate')
-                    head_line = head_line + line_format % ( head, ' ' )
+                    head = head_format.format('Event', 'Delta (ms)', 'Rate')
+                    head_line = head_line + line_format.format( head )
 
                 if len( s['event'][inst_id]['delta']) <= line_id:
-                    event_line = event_format % ( '---', 0, '---')
-                    line = line + line_format % ( event_line, ' ')
+                    event_line = event_format.format( '---', 0, '---')
+                    line = line + line_format.format( event_line)
                 else:
                     event     = s['event'][inst_id]['delta'][i][0]
                     value     = s['event'][inst_id]['delta'][i][1]
                     delta     = str(s['event'][inst_id]['delta'][i][1]/self.sleep_time) +  '/Sec'
 
-                    event_line = event_format  % ( event[:30], value, delta )
-                    line      = line + line_format % ( event_line, ' ')
+                    event_line = event_format.format( event[:30], value, delta )
+                    line      = line + line_format.format( event_line )
 
             if line_id == 0:
-                print color.BOLD + head_line + color.END
-            print line
+                print(color.BOLD + head_line + color.END)
+            print(line)
             line = ''
             event_line = ''
 
@@ -518,7 +518,7 @@ class Instances_Snap:
 
         print_lines    = self.print_global_sess_lines
         s              = self.sys
-        line_format    = '%-17s %-20s %-15s %-43s %8s %12s %12s %12s %12s %12s %10s %8s %8s'
+        line_format    = '{:<17} {:<20} {:<15} {:<43} {:8} {:12} {:12} {:12} {:12} {:12} {:10} {:8} {:8}'
         total_sessions = len(s['glob_sess'])
 
 
@@ -530,13 +530,13 @@ class Instances_Snap:
         for i in range(start, total_sessions ):
 
             if i == start:
-                print color.BOLD + '\n-- Top Global Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END
-                line = line_format % ( 'Inst: SID,Serial', 'Username', 'SQL ID', 'Event', 'ET',
+                print(color.BOLD + '\n-- Top Global Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END)
+                line = line_format.format( 'Inst: SID,Serial', 'Username', 'SQL ID', 'Event', 'ET',
                                       'Blk Gets', 'Cons Gets', 'Phy Rds', 'Blk Chgs',
                                       'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' )
-                print line
+                print(line)
 
-            line = line_format % (
+            line = line_format.format(
                                    s['glob_sess'][i]['sid'],
                                    s['glob_sess'][i]['username'][:19],
                                    s['glob_sess'][i]['sql_id'],
@@ -550,7 +550,7 @@ class Instances_Snap:
                                    s['glob_sess'][i]['os_pid'],
                                    s['glob_sess'][i]['blocking_sid'],
                                    s['glob_sess'][i]['qc_sid'] )
-            print line
+            print(line)
 
 #########################
 ##

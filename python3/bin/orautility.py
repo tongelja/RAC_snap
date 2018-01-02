@@ -1,5 +1,5 @@
 
-from __future__ import division
+
 import os, re
 import cx_Oracle, getpass
 
@@ -9,7 +9,7 @@ def getOraHome(search='.*'):
     elif os.path.isfile('/etc/oratab'):
         oratab_file = '/etc/oratab'
     else:
-        print 'No oratab found.'
+        print('No oratab found.')
         sys.exit(2)
 
     oratab = os.popen("grep -v '^#'  " + oratab_file + "  | grep -v agent | grep -v cluster | grep -v grid | grep -v ASM ").readlines()
@@ -25,7 +25,7 @@ def getLocalDbs(search='.*'):
     elif os.path.isfile('/etc/oratab'):
         oratab_file = '/etc/oratab'
     else:
-        print 'No oratab found.'
+        print('No oratab found.')
         sys.exit(2)
 
     oratab = os.popen("grep -v '^#'  " + oratab_file + " | grep -v agent | grep -v cluster | grep -v grid | grep -v ASM ").readlines()
@@ -42,7 +42,7 @@ def createOraConnection(connect):
             conn = cx_Oracle.Connection(mode = cx_Oracle.SYSDBA)
 
         except:
-            print 'Error connecting to database using connection string: ' + connect
+            print('Error connecting to database using connection string: ' + connect)
             sys.exit(2)
 
     elif len(connect.split(':')) == 1:
@@ -60,8 +60,8 @@ def createOraConnection(connect):
 
             conn = cx_Oracle.Connection(mode=cx_Oracle.SYSDBA )
         except Exception as e:
-            print 'Error connecting to database using connection string: ' + service + ' /  as sysdba'
-            print e
+            print('Error connecting to database using connection string: ' + service + ' /  as sysdba')
+            print(e)
             pass
 
     else:
@@ -82,7 +82,7 @@ def createOraConnection(connect):
         try:
             password = c[3]
         except:
-            print '\nEnter password for ' + user + '@' + hostname + ':' + str(port) + '/' + service
+            print('\nEnter password for ' + user + '@' + hostname + ':' + str(port) + '/' + service)
             password = getpass.getpass()
 
 
@@ -97,8 +97,8 @@ def createOraConnection(connect):
                 ###                    connect = 'username/password@connection_string'
                 conn = cx_Oracle.connect( user=user, password=password, dsn=dsn_tns )
             except Exception as e:
-                print 'Error connecting to database using connection string: ' + connect + '  @' + dsn_tns
-                print e
+                print('Error connecting to database using connection string: ' + connect + '  @' + dsn_tns)
+                print(e)
                 pass
 
         else:
@@ -106,8 +106,8 @@ def createOraConnection(connect):
                 ###                    connect = 'username/password@connection_string'
                 conn = cx_Oracle.connect( user=user, password=password, dsn=dsn_tns, mode=cx_Oracle.SYSDBA )
             except Exception as e:
-                print 'Error connecting to database using connection string: ' + connect + '  @' + dsn_tns
-                print e
+                print('Error connecting to database using connection string: ' + connect + '  @' + dsn_tns)
+                print(e)
                 pass
 
     return conn
@@ -120,7 +120,7 @@ def selectFoo(ora_connect):
     sql_stmt = "select instance_name from v$instance"
     cursor.execute(sql_stmt)
     rows = cursor.fetchall()
-    print rows[0][0]
+    print(rows[0][0])
 
 
 def format_number(n, unit=1000):
