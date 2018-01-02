@@ -413,30 +413,35 @@ class Instances_Snap:
 
         s           = self.sys
         columns     = self.sys['instance_count']
-        column_length = self.linesize/columns
+        column_length = round(self.linesize/columns)
         line_format = '{:<' + str(column_length) + '}'
-
 
         field_names = { 'instance_name':                     'Instance',
                         'host_name':                         'Host',
                         'startup_time':                      'Startup',
                         'status':                            'Inst Status',
-                        'database_status':                   'DB Status',
-                        'sysdate':                           'Date',
-                        'name':                              'DB Name',
                       }
 
 
         i            = 0
         line         = ''
         stat_format  = '{:<13} {:<10}'
-        print_fields = ['instance_name', 'host_name', 'sysdate', 'startup_time', 'status', 'database_status']
+        print_fields = ['instance_name', 'host_name', 'startup_time', 'status']
+
+        print(color.BOLD + '\n-- DB  Info ' + self.delimiter + color.END) 
+        stat_line = stat_format.format( 'DB Name: ',     s['db'][0]['name'] ) 
+        print(stat_line)
+        print( stat_format.format( 'Open Mode: ',   s['db'][0]['open_mode'] ) )
+        print( stat_format.format( 'Current SCN: ', s['db'][0]['current_scn'] ) )
+
+        stat      = ''
+        stat_line = ''
 
         print(color.BOLD + '\n-- Instance Info ' + self.delimiter + color.END) 
         for j in print_fields:
             for i in range(0, len(s['instances']) ):
                 stat = stat_format.format( field_names[j] + ': ' ,  str(s['instances'][i][j]) )
-                line = line + line_format.format( stat )
+                line = line + '| ' + line_format.format( stat )
             print(line)
             line = ''
 
@@ -445,7 +450,7 @@ class Instances_Snap:
 
         s             = self.sys
         columns       = self.sys['instance_count']
-        column_length = self.linesize/columns
+        column_length = round(self.linesize/columns)
         instances     = self.sys['instance_count']
         print_lines   = self.print_stat_lines
         line          = ''
@@ -461,14 +466,14 @@ class Instances_Snap:
                 i = len( s['stat'][inst_id]['delta']) - line_id -1
                 if line_id == 0:
                     head = head_format.format('Statistic (Node: ' + str(inst_id) + ')' , 'Delta', 'Rate')
-                    head_line = head_line + line_format.format( head )
+                    head_line = head_line + '  ' + line_format.format( head )
                 
                 statistic = s['stat'][inst_id]['delta'][i][0]
                 value     = s['stat'][inst_id]['delta'][i][1]
                 delta     = str(s['stat'][inst_id]['delta'][i][1]/self.sleep_time) +  '/Sec' 
 
                 stat_line = stat_format.format( statistic[:30], value, delta )
-                line      = line + line_format.format( stat_line )
+                line      = line + '| ' + line_format.format( stat_line )
 
             if line_id == 0:
                 print(color.BOLD + head_line  + color.END)
@@ -480,7 +485,7 @@ class Instances_Snap:
 
         s             = self.sys
         columns       = self.sys['instance_count']
-        column_length = self.linesize/columns
+        column_length = round(self.linesize/columns)
         instances     = self.sys['instance_count']
         print_lines   = self.print_event_lines
         line          = ''
@@ -496,18 +501,18 @@ class Instances_Snap:
                 i = len( s['event'][inst_id]['delta']) - line_id -1
                 if line_id == 0:
                     head = head_format.format('Event', 'Delta (ms)', 'Rate')
-                    head_line = head_line + line_format.format( head )
+                    head_line = head_line + '  ' + line_format.format( head )
 
                 if len( s['event'][inst_id]['delta']) <= line_id:
                     event_line = event_format.format( '---', 0, '---')
-                    line = line + line_format.format( event_line)
+                    line = line + '| ' + line_format.format( event_line)
                 else:
                     event     = s['event'][inst_id]['delta'][i][0]
                     value     = s['event'][inst_id]['delta'][i][1]
                     delta     = str(s['event'][inst_id]['delta'][i][1]/self.sleep_time) +  '/Sec'
 
                     event_line = event_format.format( event[:30], value, delta )
-                    line      = line + line_format.format( event_line )
+                    line      = line + '| ' + line_format.format( event_line )
 
             if line_id == 0:
                 print(color.BOLD + head_line + color.END)
