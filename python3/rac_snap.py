@@ -133,7 +133,7 @@ class Instances_Snap:
 
             if j[0] == 'GSESS':
                 if len(j) > 1:       self.print_global_sess_lines = int( j[1] )
-                else:                self.print_global_sess_lines = 5
+                else:                self.print_global_sess_lines = 10
             if j[0] == 'SESS':
                 if len(j) > 1:       self.print_sess_lines = int( j[1] )
                 else:                self.print_sess_lines = 5
@@ -267,7 +267,11 @@ class Instances_Snap:
                 name    = rows[i][1]
                 value   = rows[i][2]
                 inst_id = rows[i][3]
-                
+               
+                if name not in self.sys['stat'][inst_id]['run_data']:
+                    self.sys['stat'][inst_id]['run_data'][name] = {}
+                    self.sys['stat'][inst_id]['run_data'][name]['run_01'] = 0
+ 
                 run01_value= self.sys['stat'][inst_id]['run_data'][name]['run_01']
                 self.sys['stat'][inst_id]['run_data'][name]['run_02'] = value
                 delta = value - run01_value
@@ -392,10 +396,15 @@ class Instances_Snap:
                 value   = rows[i][2]
                 inst_id = rows[i][3]
 
+                if name not in self.sys['event'][inst_id]['run_data']:
+                    self.sys['event'][inst_id]['run_data'][name] = {}
+                    self.sys['event'][inst_id]['run_data'][name]['run_01'] = 0
+
                 run01_value= self.sys['event'][inst_id]['run_data'][name]['run_01']
                 self.sys['event'][inst_id]['run_data'][name]['run_02'] = value
                 delta = value - run01_value
                 self.sys['event'][inst_id]['run_data'][name]['delta'] = delta
+
                 if delta > 0:
                     if inst_id in d:
                         d[inst_id][name] = delta
@@ -429,10 +438,9 @@ class Instances_Snap:
         print_fields = ['instance_name', 'host_name', 'startup_time', 'status']
 
         print(color.BOLD + '\n-- DB  Info ' + self.delimiter + color.END) 
-        stat_line = stat_format.format( 'DB Name: ',     s['db'][0]['name'] ) 
-        print(stat_line)
-        print( stat_format.format( 'Open Mode: ',   s['db'][0]['open_mode'] ) )
-        print( stat_format.format( 'Current SCN: ', s['db'][0]['current_scn'] ) )
+        print( stat_format.format( '| Open Mode: ',   s['db'][0]['name'] ) )
+        print( stat_format.format( '| Open Mode: ',   s['db'][0]['open_mode'] ) )
+        print( stat_format.format( '| Current SCN: ', s['db'][0]['current_scn'] ) )
 
         stat      = ''
         stat_line = ''
@@ -465,16 +473,20 @@ class Instances_Snap:
             for inst_id in range(1, instances+1):
                 i = len( s['stat'][inst_id]['delta']) - line_id -1
                 if line_id == 0:
-                    head = head_format.format('Statistic (Node: ' + str(inst_id) + ')' , 'Delta', 'Rate')
+                    head = head_format.format('Statistic' , 'Delta', 'Rate')
                     head_line = head_line + '  ' + line_format.format( head )
-                
-                statistic = s['stat'][inst_id]['delta'][i][0]
-                value     = s['stat'][inst_id]['delta'][i][1]
-                delta     = str(s['stat'][inst_id]['delta'][i][1]/self.sleep_time) +  '/Sec' 
+        
+                if len( s['stat'][inst_id]['delta']) <= line_id:
+                    stat_line = stat_format.format( '---', 0, '---')
+                    line = line + '| ' + line_format.format( stat_line)
+                else:
+                    statistic = s['stat'][inst_id]['delta'][i][0]
+                    value     = s['stat'][inst_id]['delta'][i][1]
+                    delta     = str(round(s['stat'][inst_id]['delta'][i][1]/self.sleep_time)) +  '/Sec'
 
-                stat_line = stat_format.format( statistic[:30], value, delta )
-                line      = line + '| ' + line_format.format( stat_line )
-
+                    stat_line = stat_format.format( statistic[:30], value, delta )
+                    line      = line + '| ' + line_format.format( stat_line )
+        
             if line_id == 0:
                 print(color.BOLD + head_line  + color.END)
             print(line) 
