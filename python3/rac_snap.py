@@ -133,7 +133,7 @@ class Instances_Snap:
 
             if j[0] == 'GSESS':
                 if len(j) > 1:       self.print_global_sess_lines = int( j[1] )
-                else:                self.print_global_sess_lines = 10
+                else:                self.print_global_sess_lines = 30
             if j[0] == 'SESS':
                 if len(j) > 1:       self.print_sess_lines = int( j[1] )
                 else:                self.print_sess_lines = 5
@@ -319,8 +319,8 @@ class Instances_Snap:
                         s.inst_id  \
                         from gv$session s, gv$sess_io io, gv$process p, gv$px_session px \
                         where s.inst_id = p.inst_id and s.inst_id = io.inst_id and s.inst_id = px.inst_id(+)  \
-                        and p.inst_id = io.inst_id and p.inst_id = px.inst_id  \
-                        and io.inst_id = px.inst_id  \
+                        and p.inst_id = io.inst_id and p.inst_id = px.inst_id(+)  \
+                        and io.inst_id = px.inst_id(+)  \
                         and s.sid = px.sid(+) and s.sid = io.sid and  s.paddr = p.addr and s.username is not null \
                         and s.event not like '%rdbms ipc message%' and s.event not like '%message from client%' \
                         and s.status = 'ACTIVE' \
