@@ -59,6 +59,18 @@ class color:
     UNDERLINE = '\033[4m'
     END = '\033[0m'
 
+def format_number(number_in):
+
+    if number_in >=1000000000:
+        number_out=str(round(number_in/1000/1000)) + 'M'
+    elif number_in >= 1000000:
+        number_out=str(round(number_in/1000)) + 'K'
+    else:
+        number_out = str(round(number_in))
+
+    return number_out
+ 
+
 def max_length(a, b):
     c = len(str(a))
     d = len(str(b))
@@ -437,7 +449,7 @@ class Instances_Snap:
         stat_format  = '{:<13} {:<10}'
         print_fields = ['instance_name', 'host_name', 'startup_time', 'status']
 
-        print(color.BOLD + '\n-- DB  Info ' + self.delimiter + color.END) 
+        print(color.BOLD + '\n- DB  Info ' + self.delimiter + color.END) 
         print( stat_format.format( '| Open Mode: ',   s['db'][0]['name'] ) )
         print( stat_format.format( '| Open Mode: ',   s['db'][0]['open_mode'] ) )
         print( stat_format.format( '| Current SCN: ', s['db'][0]['current_scn'] ) )
@@ -445,7 +457,7 @@ class Instances_Snap:
         stat      = ''
         stat_line = ''
 
-        print(color.BOLD + '\n-- Instance Info ' + self.delimiter + color.END) 
+        print(color.BOLD + '\n- Instance Info ' + self.delimiter + color.END) 
         for j in print_fields:
             for i in range(0, len(s['instances']) ):
                 stat = stat_format.format( field_names[j] + ': ' ,  str(s['instances'][i][j]) )
@@ -465,26 +477,30 @@ class Instances_Snap:
         stat_line     = ''
         head          = ''
         head_line     = ''
-        stat_format   = '{:<30} {:<15.0f} {:<15}'
+        stat_format   = '{:<30} {:<15s} {:<15}'
         head_format   = '{:<30} {:<15s} {:<15}'
         line_format = '{:<' + str(column_length) + '}'
-        print(color.BOLD + '\n-- Statistics ' + self.delimiter + color.END)
+
+        print(color.BOLD + '\n- Statistics ' + self.delimiter + color.END)
+
         for line_id in range(print_lines):
             for inst_id in range(1, instances+1):
-                i = len( s['stat'][inst_id]['delta']) - line_id -1
+                #i = len( s['stat'][inst_id]['delta']) - line_id  - 1
+                i = len( s['stat'][inst_id]['delta']) - print_lines + line_id 
                 if line_id == 0:
                     head = head_format.format('Statistic' , 'Delta', 'Rate')
                     head_line = head_line + '  ' + line_format.format( head )
         
-                if len( s['stat'][inst_id]['delta']) <= line_id:
+                #if len( s['stat'][inst_id]['delta']) <= line_id:
+                if i < 0:
                     stat_line = stat_format.format( '---', 0, '---')
                     line = line + '| ' + line_format.format( stat_line)
                 else:
                     statistic = s['stat'][inst_id]['delta'][i][0]
                     value     = s['stat'][inst_id]['delta'][i][1]
-                    delta     = str(round(s['stat'][inst_id]['delta'][i][1]/self.sleep_time)) +  '/Sec'
+                    delta     = str(format_number(s['stat'][inst_id]['delta'][i][1]/self.sleep_time)) +  '/Sec'
 
-                    stat_line = stat_format.format( statistic[:30], value, delta )
+                    stat_line = stat_format.format( statistic[:30], format_number(value), delta )
                     line      = line + '| ' + line_format.format( stat_line )
         
             if line_id == 0:
@@ -504,26 +520,28 @@ class Instances_Snap:
         event_line    = ''
         head          = ''
         head_line     = ''
-        event_format  = '{:<30} {:<15.0f} {:<15}'
+        event_format  = '{:<30} {:<15} {:<15}'
         head_format   = '{:<30} {:<15} {:<15}'
         line_format   = '{:<' + str(column_length) + '}'
-        print(color.BOLD + '\n-- Events ' + self.delimiter + color.END)
+        print(color.BOLD + '\n- Events ' + self.delimiter + color.END)
         for line_id in range(print_lines):
             for inst_id in range(1, instances+1):
-                i = len( s['event'][inst_id]['delta']) - line_id -1
+                #i = len( s['event'][inst_id]['delta']) - line_id -1
+                i = len( s['event'][inst_id]['delta']) - print_lines + line_id
                 if line_id == 0:
                     head = head_format.format('Event', 'Delta (ms)', 'Rate')
                     head_line = head_line + '  ' + line_format.format( head )
 
-                if len( s['event'][inst_id]['delta']) <= line_id:
+                #if len( s['event'][inst_id]['delta']) <= line_id:
+                if i < 0:
                     event_line = event_format.format( '---', 0, '---')
                     line = line + '| ' + line_format.format( event_line)
                 else:
                     event     = s['event'][inst_id]['delta'][i][0]
                     value     = s['event'][inst_id]['delta'][i][1]
-                    delta     = str(s['event'][inst_id]['delta'][i][1]/self.sleep_time) +  '/Sec'
+                    delta     = str(format_number(s['event'][inst_id]['delta'][i][1]/self.sleep_time)) +  '/Sec'
 
-                    event_line = event_format.format( event[:30], value, delta )
+                    event_line = event_format.format( event[:30], format_number(value), delta )
                     line      = line + '| ' + line_format.format( event_line )
 
             if line_id == 0:
@@ -549,7 +567,7 @@ class Instances_Snap:
         for i in range(start, total_sessions ):
 
             if i == start:
-                print(color.BOLD + '\n-- Top Global Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END)
+                print(color.BOLD + '\n- Top Global Sessions (' + str(total_sessions) + ')' + self.delimiter + color.END)
                 line = color.BOLD + line_format.format( 'Instance', 'SID,Serial', 'Username', 'SQL ID', 'Event', 'ET',
                                       'Blk Gets', 'Cons Gets', 'Phy Rds', 'Blk Chgs',
                                       'Cons Chgs', 'OS PID', 'Blocker', 'QC SID' ) + color.END
