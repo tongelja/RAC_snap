@@ -450,8 +450,8 @@ class Instances_Snap:
         print_fields = ['instance_name', 'host_name', 'startup_time', 'status']
 
         print(color.BOLD + '\n- DB  Info ' + self.delimiter + color.END) 
-        print( stat_format.format( '| Open Mode: ',   s['db'][0]['name'] ) )
-        print( stat_format.format( '| Open Mode: ',   s['db'][0]['open_mode'] ) )
+        print( stat_format.format( '| DB Name:     ',   s['db'][0]['name'] ) )
+        print( stat_format.format( '| Open Mode:   ',   s['db'][0]['open_mode'] ) )
         print( stat_format.format( '| Current SCN: ', s['db'][0]['current_scn'] ) )
 
         stat      = ''
