@@ -4,8 +4,12 @@
 
 ##########################
 ##
+## RAC Snapshot
 ##
 ##
+## 1/5/2018 - Updated from python2 -> python3
+## 1/5/2018 - Python3 Version 1
+## 1/6/2018 - Updates to inst_id to accomodate RACs that don't start with node 1
 ##
 ##################################
 
@@ -232,13 +236,14 @@ class Instances_Snap:
         sql_stmt = "select count(*)  from gv$instance"
         cursor.execute(sql_stmt)
         rows = cursor.fetchall()
-
-        #for row_num in range(0, len(rows)):
-        #    for i in range(0, len(field_list) ):
         r = rows[0][0]
-
         self.sys['instance_count'] = r
 
+        sql_stmt = "select min(inst_id)  from gv$instance"
+        cursor.execute(sql_stmt)
+        rows = cursor.fetchall()
+        r = rows[0][0]
+        self.sys['start_inst_id'] = r
 
 
     def get_stats_snapshot(self, run):
@@ -289,14 +294,15 @@ class Instances_Snap:
                 delta = value - run01_value
                 self.sys['stat'][inst_id]['run_data'][name]['delta'] = delta
                 if delta > 0:
-                    if inst_id in d:
-                        d[inst_id][name] = delta
-                    else:
+                    if not inst_id in d:
                         d[inst_id] = {}
+
+                    d[inst_id][name] = delta
             
 
             instances = self.sys['instance_count']
-            for i in range(1, instances+1):
+            start_instance = self.sys['start_inst_id']
+            for i in range(start_instance, start_instance + instances):
                 l = sorted(iter(d[i].items()), key=operator.itemgetter(1))
                 self.sys['stat'][i]['delta'] = l
 
@@ -425,7 +431,8 @@ class Instances_Snap:
 
 
             instances = self.sys['instance_count']
-            for i in range(1, instances+1):
+            start_instance = self.sys['start_inst_id']
+            for i in range(start_instance, start_instance + instances):
                 l = sorted(iter(d[i].items()), key=operator.itemgetter(1))
                 self.sys['event'][i]['delta'] = l
 
@@ -483,8 +490,11 @@ class Instances_Snap:
 
         print(color.BOLD + '\n- Statistics ' + self.delimiter + color.END)
 
+        instances = self.sys['instance_count']
+        start_instance = self.sys['start_inst_id']
+
         for line_id in range(print_lines):
-            for inst_id in range(1, instances+1):
+            for inst_id in range(start_instance, start_instance + instances):
                 #i = len( s['stat'][inst_id]['delta']) - line_id  - 1
                 i = len( s['stat'][inst_id]['delta']) - print_lines + line_id 
                 if line_id == 0:
@@ -524,8 +534,12 @@ class Instances_Snap:
         head_format   = '{:<30} {:<15} {:<15}'
         line_format   = '{:<' + str(column_length) + '}'
         print(color.BOLD + '\n- Events ' + self.delimiter + color.END)
+
+        instances = self.sys['instance_count']
+        start_instance = self.sys['start_inst_id']
+
         for line_id in range(print_lines):
-            for inst_id in range(1, instances+1):
+            for inst_id in range(start_instance, start_instance+instances):
                 #i = len( s['event'][inst_id]['delta']) - line_id -1
                 i = len( s['event'][inst_id]['delta']) - print_lines + line_id
                 if line_id == 0:
