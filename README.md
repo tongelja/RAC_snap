@@ -1,1 +1,1 @@
-# RAC_snap
+README for RAC Snapshot
