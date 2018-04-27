@@ -40,7 +40,7 @@ def usage_exit(message):
     print(os.path.abspath( __file__ ), '\n \
     Options: \n\n \
         [ -c CONNECTION_STRING ] \n \
-             Connection String Format:  SID:Hostname[:User:Password] \n\n \
+             Connection String Format:  User/Password@Host/DB  \n\n \
         [ -f SNAPSHOT[:LINES],... ] \n \
              Snapshot Options: GSESS \n \
                                SESS \n \
@@ -108,7 +108,19 @@ def main():
     if format is None:
         format = 'STAT,EVENT,GSESS'
 
-    conn = orautility.createOraConnection(connect)
+
+    db_user     = connect.split('@')[0].split('/')[0]
+    db_host     = connect.split('@')[1]
+
+    try:
+        db_password = connect.split('@')[0].split('/')[1]
+    except IndexError as err:
+        db_password = getpass.getpass('Password: ')
+
+    print('user=' + db_user + ' db_password=*********' + ' db_host=' + db_host)
+
+    conn = cx_Oracle.connect(user=db_user, password=db_password, dsn=db_host, mode=cx_Oracle.SYSDBA )
+
 
     my_snap = Instances_Snap(conn, format)
 
