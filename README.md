@@ -24,7 +24,7 @@ You will need to have cx_Oracle installed.
 Run RacSnap with python3 and pass your connection information
 
 ```
-python3 racsnap.py -c mydb001:myserver00001:sys;mysyspassword
+python3 racsnap.py -c sys/password@SERVER/DB
 ```
 
 Your output will refresh every few seconds and look like this:
